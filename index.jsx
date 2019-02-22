@@ -6,41 +6,79 @@
  */
 const HEART_WIDTH = 40
 
-// Position of bar (default: top 10, left 10)
+/**
+ * Space between hearts in in percentage of HEART_WIDTH.
+ * Default: HEART_WIDTH / 10
+ */
+const HEART_MARGIN = HEART_WIDTH / 10
+
+/**
+ * Max number of hearts to show in a row, defaults to authentic 10.
+ * Default: 10
+ */
+const MAX_HEARTS_IN_ROW = 10
+
+/**
+ * Position of bar, defaults to authentic top left.
+ * default: { top: 10, left: 10 }
+ */
 export const className = {
   top: 10,
   left: 10
 }
 
-// The polling rate/time between each update, not sure if changing this has performance effects (default: 30000)
+/**
+ * The polling rate/time between each update.
+ * Not sure if changing this has performance effects.
+ * Default: 30000 (30 seconds)
+ */
 export const refreshFrequency = 30000
 
-// Make sure the string has the correct dir name of the widget (default: zelda-battery.widget)
+/**
+ * Helper function to generate file paths.
+ * Make sure the string has the correct dir name of the widget.
+ * Default: `./zelda-battery.widget/hearts/${fileName}`
+ * @param {String} fileName The file name (eg. image.png).
+ */
 const heartImg = (fileName) => `./zelda-battery.widget/hearts/${fileName}`
-
-
 
 /**
  * Things down here are a bit more advanced.
  * I'll point out spots where customization might make sense.
  */
 
-const percentRegex = /\d+%/gm
-
+/**
+ * Bash command to check batter level.
+ */
 export const command = 'pmset -g batt'
 
+/**
+ * Initial state of hearts.
+ * 0 = Empty
+ * 25 = Quarter
+ * 50 = Half
+ * 75 = Three Quarter
+ * 1 = Full
+ */
 export const initialState = {
   output: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 }
 
+/**
+ * Render method.
+ * @param    {Object}        state  The state passed in
+ * @property {Array[Number]} output The array of hearts (renamed hearts in assignment).
+ */
 export const render = ({ output: hearts }) => {
   return (
-    <div style={{
-      zIndex: 10,
-      maxWidth: (HEART_WIDTH * 10),
-      display: 'flex',
-      flexWrap: 'wrap'
-    }}>
+    <div
+      style={{
+        zIndex: 10,
+        maxWidth: ((HEART_WIDTH + HEART_MARGIN) * 10),
+        display: 'flex',
+        flexWrap: 'wrap'
+      }}
+    >
       {hearts.map((heart, i) => {
         let heartSrc
         /**
@@ -56,7 +94,7 @@ export const render = ({ output: hearts }) => {
           default: heartSrc = heartImg('full-heart-4x.png')
         }
         return (
-          <div id={i}>
+          <div key={i} style={{ margin: `0 ${HEART_MARGIN / 2}px` }}>
             <img src={heartSrc} width={HEART_WIDTH} />
           </div>
         )
@@ -64,6 +102,7 @@ export const render = ({ output: hearts }) => {
     </div>
   )
 }
+
 /**
  * This could potentially be optimized or slightly tweaked.
  * This favors rounding down, so if we were to have 99% of a heart, it uses the 75% heart.
@@ -72,7 +111,7 @@ export const render = ({ output: hearts }) => {
  */
 export const updateState = (event, previousState) => {
   if (event.output) {
-    const battery = event.output.match(percentRegex)[0].replace('%', '')
+    const battery = event.output.match(/\d+%/gm)[0].replace('%', '')
     let numHearts = (battery / 100) * initialState.output.length
     const hearts = []
     for (let i = 0; i < initialState.output.length; i++) {
