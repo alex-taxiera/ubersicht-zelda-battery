@@ -1,6 +1,13 @@
 /* Useful variables */
 
 /**
+ * The name of the widget folder.
+ * You'll need this set correctly to find images and the battery script.
+ * Default: zelda-battery.widget
+ */
+const DIR_NAME = 'zelda-battery.widget'
+
+/**
  * Width of hearts in pixels.
  * Default: 40
  */
@@ -36,11 +43,11 @@ export const refreshFrequency = 30000
 
 /**
  * Helper function to generate file paths.
- * Make sure the string has the correct dir name of the widget.
+ * Make sure the string has the correct dir name of the images.
  * Default: `./zelda-battery.widget/hearts/${fileName}`
  * @param {String} fileName The file name (eg. image.png).
  */
-const heartImg = (fileName) => `./zelda-battery.widget/hearts/${fileName}`
+const heartImg = (fileName) => `${DIR_NAME}/hearts/${fileName}`
 
 /**
  * Things down here are a bit more advanced.
@@ -48,9 +55,9 @@ const heartImg = (fileName) => `./zelda-battery.widget/hearts/${fileName}`
  */
 
 /**
- * Bash command to check batter level.
+ * Bash command to check battery level.
  */
-export const command = 'pmset -g batt'
+export const command = `sh ${DIR_NAME}/battery.sh`
 
 /**
  * Initial state of hearts.
@@ -111,8 +118,7 @@ export const render = ({ output: hearts }) => {
  */
 export const updateState = (event, previousState) => {
   if (event.output) {
-    const battery = event.output.match(/\d+%/gm)[0].replace('%', '')
-    let numHearts = (battery / 100) * initialState.output.length
+    let numHearts = (event.output / 100) * initialState.output.length
     const hearts = []
     for (let i = 0; i < initialState.output.length; i++) {
       if (numHearts >= 1) {
