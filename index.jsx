@@ -19,6 +19,12 @@ const HEART_MARGIN = HEART_WIDTH / 10
 const MAX_HEARTS_IN_ROW = 10
 
 /**
+ * Max number of hearts to show in total, defaults to authentic 10.
+ * Default: 10
+ */
+const MAX_HEARTS = 10
+
+/**
  * Position of bar, defaults to authentic top left.
  * default: { top: 10, left: 10 }
  */
@@ -61,7 +67,7 @@ export const command = 'pmset -g batt'
  * 1 = Full
  */
 export const initialState = {
-  output: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+  output: Array(MAX_HEARTS).fill(1)
 }
 
 /**
@@ -74,7 +80,7 @@ export const render = ({ output: hearts }) => {
     <div
       style={{
         zIndex: 10,
-        maxWidth: ((HEART_WIDTH + HEART_MARGIN) * 10),
+        maxWidth: ((HEART_WIDTH + HEART_MARGIN) * MAX_HEARTS_IN_ROW),
         display: 'flex',
         flexWrap: 'wrap'
       }}
