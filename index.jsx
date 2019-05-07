@@ -68,7 +68,7 @@ export const className = {
  * Not sure if changing this has performance effects.
  * Default: 30000 (30 seconds)
  */
-export const refreshFrequency = 30000
+export const refreshFrequency = 10000
 
 /**
  * Helper function to generate file paths.
@@ -120,65 +120,70 @@ export const initialState = {
     )
 }
 
+let debug = []
+
 /**
  * Render method.
  * @param {State} state The state passed in
  */
-export const render = (state) => {
-  const {
-    hearts
-  } = state
+export const render = ({ hearts = [] }) => (
+  <div style={{ background: 'white' }}>
+    <div>{debug.map((item, i) => <div key={i}>{item}</div>)}</div>
+    <div>{JSON.stringify(hearts)}</div>
+  </div>
+)
 
-  return (
-    <div
-      style={{
-        display: 'flex',
-        flexFlow: 'column',
-        alignContent: 'space-between'
-      }}
-    >
-      {
-        hearts.map((row, i) => (
-          <div
-            key={i}
-            style={{
-              width: ((HEART_WIDTH + HEART_MARGIN) * row.length) - HEART_MARGIN,
-              height: HEART_HEIGHT + HEART_MARGIN,
-              display: 'flex',
-              justifyContent: 'space-between'
-            }}
-          >
-            {
-              row.map((heart, j) => {
-                let heartSrc
-                /**
-                 * If you wanna change the icons you can do that here.
-                 * Just change the strings to the filenames of your icons.
-                 */
-                switch (heart) {
-                  case 0.00: heartSrc = heartImg('empty-heart-4x.png'); break
-                  case 0.25: heartSrc = heartImg('quarter-heart-4x.png'); break
-                  case 0.50: heartSrc = heartImg('half-heart-4x.png'); break
-                  case 0.75: heartSrc = heartImg('three-quarter-heart-4x.png'); break
-                  case 1.00: heartSrc = heartImg('full-heart-4x.png'); break
-                  default  : heartSrc = heartImg('full-heart-4x.png')
-                }
-                return (
-                  <img
-                    key={j}
-                    src={heartSrc}
-                    width={HEART_WIDTH}
-                    height={HEART_HEIGHT}
-                  />
-                )
-              })
-            }
-          </div>
-        ))
-      }
-    </div>
-  )
-}
+/*
+(
+  <div
+    style={{
+      display: 'flex',
+      flexFlow: 'column',
+      alignContent: 'space-between'
+    }}
+  >
+    {
+      hearts.map((row, i) => (
+        <div
+          key={i}
+          style={{
+            width: ((HEART_WIDTH + HEART_MARGIN) * row.length) - HEART_MARGIN,
+            height: HEART_HEIGHT + HEART_MARGIN,
+            display: 'flex',
+            justifyContent: 'space-between'
+          }}
+        >
+          {
+            row.map((heart, j) => {
+              let heartSrc
+              /**
+               * If you wanna change the icons you can do that here.
+               * Just change the strings to the filenames of your icons.
+               *
+              switch (heart) {
+                case 0.00: heartSrc = heartImg('empty-heart-4x.png'); break
+                case 0.25: heartSrc = heartImg('quarter-heart-4x.png'); break
+                case 0.50: heartSrc = heartImg('half-heart-4x.png'); break
+                case 0.75: heartSrc = heartImg('three-quarter-heart-4x.png'); break
+                case 1.00: heartSrc = heartImg('full-heart-4x.png'); break
+                default  : heartSrc = heartImg('full-heart-4x.png')
+              }
+              return (
+                <img
+                  key={j}
+                  src={heartSrc}
+                  width={HEART_WIDTH}
+                  height={HEART_HEIGHT}
+                />
+              )
+            })
+          }
+        </div>
+      ))
+    }
+  </div>
+)
+*/
 
 /**
  * This could potentially be optimized or slightly tweaked.
@@ -186,6 +191,8 @@ export const render = (state) => {
  * @param {State} previousState The previous/current state rendered.
  */
 export const updateState = (event, previousState) => {
+  debug.push(JSON.stringify(event))
+  debug.push(JSON.stringify(previousState))
   if (event.error) {
     console.error('ERROR: ', event.error)
     return previousState
@@ -223,6 +230,7 @@ export const updateState = (event, previousState) => {
       hearts[i][j] = flatHearts[(i * MAX_HEARTS_IN_ROW) + j]
     }
   }
+  console.log('hearts', hearts)
 
   return {
     hearts
