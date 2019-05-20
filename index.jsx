@@ -54,6 +54,17 @@ const NUM_ROWS = Math.ceil(MAX_HEARTS / MAX_HEARTS_IN_ROW)
  */
 const HEARTS_IN_LAST_ROW = (MAX_HEARTS % MAX_HEARTS_IN_ROW) || MAX_HEARTS_IN_ROW
 
+
+/** Magic meter to show the processing %
+ * Default: 0.5
+ * Set to length of max hearts row
+ * Optional: 1
+ * Hide magic meter
+ * Optional: 0
+*/
+const MAGIC_METER = 0.5
+const MAGIC_METER_WIDTH = (((HEART_WIDTH + HEART_MARGIN) * MAX_HEARTS_IN_ROW) * MAGIC_METER)
+
 /**
  * Pulsing heart for the last partial or fully filled heart
  * Default: True
@@ -82,20 +93,20 @@ const injectStyle = (style) => {
 
 const keyframesStyle = `
 @-webkit-keyframes pulse {
-0% {
-  -webkit-transform: scale(1);
-  transform: scale(1);
-}
+  0% {
+    -webkit-transform: scale(1);
+    transform: scale(1);
+  }
 
-50% {
-  -webkit-transform: scale(1.25);
-  transform: scale(1.25);
-}
+  50% {
+    -webkit-transform: scale(1.25);
+    transform: scale(1.25);
+  }
 
-100% {
-  -webkit-transform: scale(1);
-  transform: scale(1);
-}
+  100% {
+    -webkit-transform: scale(1);
+    transform: scale(1);
+  }
 }`;
 
 injectStyle(keyframesStyle);
@@ -157,7 +168,7 @@ export const initialState = {
     ),
     css:{
       container: {
-        WebkitAnimation: 'pulse 1s ease-in-out infinite normal'
+        WebkitAnimation: 'pulse 2s ease-in-out infinite normal'
       },
     }
 }
@@ -168,7 +179,8 @@ export const initialState = {
  */
 export const render = (state) => {
   const {
-    hearts
+    hearts,
+    magic
   } = state
 
   return (
@@ -234,6 +246,27 @@ export const render = (state) => {
           </div>
         ))
       }
+      <div
+        style={ MAGIC_METER > 0 ? {
+          backgroundColor: 'black',
+          border: '5px solid white',
+          borderRadius: '15px',
+          width: MAGIC_METER_WIDTH,
+          height: '40px',
+          marginTop: '10px' }
+          : { display:'none' }
+        }
+      >
+        <div
+          style={{
+            backgroundColor: 'green',
+            width: MAGIC_METER_WIDTH * magic,
+            height: '32px',
+            margin: '4px',
+          }}
+        >
+        </div>
+      </div>
     </div>
   )
 }
@@ -254,7 +287,8 @@ export const updateState = (event, previousState) => {
   const numHearts = (percentage / 100) * MAX_HEARTS
   const fullHearts = Math.floor(numHearts)
   const remainder = numHearts - fullHearts
-  
+  const magic = event.output.match(/\d+\.\d+%\sidle/)[0].replace('%', '').replace('idle', '')/100
+
   if (remainder > 0) {
     let lastHeart = { index: -1, diff: 99 }
     const possibleVals = [1, 0.75, 0.50, 0.25, 0]
@@ -283,6 +317,6 @@ export const updateState = (event, previousState) => {
   }
 
   return {
-    hearts
+    hearts, magic
   }
 }
