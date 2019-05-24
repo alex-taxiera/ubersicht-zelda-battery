@@ -66,6 +66,12 @@ const MAGIC_METER = 0.5
 const MAGIC_METER_WIDTH = (((HEART_WIDTH + HEART_MARGIN) * MAX_HEARTS_IN_ROW) * MAGIC_METER)
 
 /**
+ * Pulsing heart for the last partial or fully filled heart
+ * Default: True
+ */
+const HEART_PULSE = true
+
+/**
  * Position of bar, defaults to authentic top left.
  * There is 10px of padding to give margin.
  * default: { padding: 10 }
@@ -73,6 +79,37 @@ const MAGIC_METER_WIDTH = (((HEART_WIDTH + HEART_MARGIN) * MAX_HEARTS_IN_ROW) * 
 export const className = {
   padding: 10
 }
+
+const injectStyle = (style) => {
+  const styleElement = document.createElement('style');
+  let styleSheet = null;
+
+  document.head.appendChild(styleElement);
+
+  styleSheet = styleElement.sheet;
+
+  styleSheet.insertRule(style, styleSheet.cssRules.length);
+};
+
+const keyframesStyle = `
+@-webkit-keyframes pulse {
+  0% {
+    -webkit-transform: scale(1);
+    transform: scale(1);
+  }
+
+  50% {
+    -webkit-transform: scale(1.25);
+    transform: scale(1.25);
+  }
+
+  100% {
+    -webkit-transform: scale(1);
+    transform: scale(1);
+  }
+}`;
+
+injectStyle(keyframesStyle);
 
 /**
  * The polling rate/time between each update.
@@ -128,7 +165,12 @@ export const initialState = {
     .map((row, i) => i !== NUM_ROWS - 1
       ? Array(MAX_HEARTS_IN_ROW).fill(1)
       : Array(HEARTS_IN_LAST_ROW).fill(1)
-    )
+    ),
+    css:{
+      container: {
+        WebkitAnimation: 'pulse 2s ease-in-out infinite normal'
+      },
+    }
 }
 
 /**
@@ -175,9 +217,25 @@ export const render = (state) => {
                   case 1.00: heartSrc = heartImg('full-heart-4x.png'); break
                   default  : heartSrc = heartImg('full-heart-4x.png')
                 }
+
+                /**
+                * Find last heart filled
+                * last heart in last row is > 0
+                * last heart in row and next == 0
+                * next heart == 0
+                */
+                const isLastHeart = (heart>0 &&
+                  (
+                    ((i+1)==NUM_ROWS && j+1==HEARTS_IN_LAST_ROW) ||
+                    ((i+1)<NUM_ROWS && j+1==MAX_HEARTS_IN_ROW && hearts[i+1][0]==0) ||
+                    row[j+1]==0
+                  )
+                ) ? true : false
+
                 return (
                   <img
                     key={j}
+                    style={isLastHeart && HEART_PULSE ? initialState.css.container : {}}
                     src={heartSrc}
                     width={HEART_WIDTH}
                     height={HEART_HEIGHT}
