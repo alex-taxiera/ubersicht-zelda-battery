@@ -282,12 +282,12 @@ export const updateState = (event, previousState) => {
     return previousState
   }
 
+  const outputObj = JSON.parse(event.output)
   const flatHearts = initialState.hearts.flat()
-  const percentage = parseInt(event.output)
-  const numHearts = (percentage / 100) * MAX_HEARTS
+  const numHearts = (outputObj.hearts / 100) * MAX_HEARTS
   const fullHearts = Math.floor(numHearts)
   const remainder = numHearts - fullHearts
-  const magic = event.output.match(/\d+\.\d+%\sidle/)[0].replace('%', '').replace('idle', '')/100
+  const magic = outputObj.magic / 100
 
   if (remainder > 0) {
     let lastHeart = { index: -1, diff: 99 }
